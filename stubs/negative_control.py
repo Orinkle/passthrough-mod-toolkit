@@ -17,7 +17,8 @@ import sys
 import tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-INTERP = "/home/zjk/.workbuddy/binaries/python/envs/default/bin/python"
+# Same rule as run_demo.py: inherit the caller's interpreter unless PT_PY is set.
+INTERP = os.environ.get("PT_PY") or sys.executable
 
 # (scenario, guest source patch: old -> new)
 CONTROLS = [

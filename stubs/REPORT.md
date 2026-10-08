@@ -22,10 +22,10 @@ v1-stubs/
 一条命令复现（解释器绝对路径）：
 
 ```bash
-/home/zjk/.workbuddy/binaries/python/envs/default/bin/python \
-  /home/zjk/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/03-复现路线/v1-stubs/run_demo.py && \
-/home/zjk/.workbuddy/binaries/python/envs/default/bin/python \
-  /home/zjk/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/03-复现路线/v1-stubs/render_demo.py
+python3 \
+  <home>/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/03-复现路线/v1-stubs/run_demo.py && \
+python3 \
+  <home>/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/03-复现路线/v1-stubs/render_demo.py
 ```
 
 ## 2. 传输方式：**共享内存映射**（不是 WebSocket）

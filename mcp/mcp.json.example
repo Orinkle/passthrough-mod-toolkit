@@ -1,12 +1,12 @@
 {
   "mcpServers": {
     "ptmodmaker": {
-      "command": "/home/zjk/.workbuddy/binaries/python/envs/default/bin/python",
+      "command": "python3",
       "args": [
         "{{REPO_ROOT}}/03-复现路线/v2-mcp/server.py"
       ],
       "env": {
-        "PT_PY": "/home/zjk/.workbuddy/binaries/python/envs/default/bin/python"
+        "PT_PY": "python3"
       }
     }
   }

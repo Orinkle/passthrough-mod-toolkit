@@ -18,7 +18,10 @@ import sys
 import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-INTERP = "/home/zjk/.workbuddy/binaries/python/envs/default/bin/python"
+# Interpreter used to spawn the fake host/guest. sys.executable keeps the child
+# on the same interpreter as the caller (so a venv with PyYAML is inherited);
+# override with PT_PY if you want something else.
+INTERP = os.environ.get("PT_PY") or sys.executable
 sys.path.insert(0, HERE)
 
 import layout_from_schema as L            # noqa: E402

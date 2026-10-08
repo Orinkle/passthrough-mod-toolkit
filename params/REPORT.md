@@ -88,13 +88,13 @@ v0-params/
 ## 7. 可复现命令
 
 ```bash
-/home/zjk/.workbuddy/binaries/python/envs/default/bin/python \
+python3 \
   passthrough-lab/03-复现路线/v0-params/param_lookup.py --host skyrim --color red
 ```
 解释器为已装 PyYAML 6.0.3 的专用环境；`--host` 按宿主名子串过滤（如 skyrim/valheim/gta），
 `--color` 按 🟢🟡🔴 复用档过滤，输出带完整出处的表格。重建种子：
 ```bash
-/home/zjk/.workbuddy/binaries/python/envs/default/bin/python \
+python3 \
   passthrough-lab/03-复现路线/v0-params/seed_from_awesome.py
 ```
 （自动对 7 个 MIT 仓库调 `gh` 取 HEAD SHA，失败如实留 null。）

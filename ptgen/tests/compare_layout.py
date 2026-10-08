@@ -14,7 +14,7 @@ measuring, not by assertion-reading, wherever a compiler/runtime exists:
 Ground truth is the **compiled C++ header**, and the language-neutral ctypes model is
 checked against it too. Every other language's measured/parsed table must match it.
 
-Run:  /home/zjk/.workbuddy/binaries/python/envs/default/bin/python tests/compare_layout.py
+Run:  python3 tests/compare_layout.py
 Exit: 0 if every comparable language matches C++; non-zero otherwise.
 """
 import argparse

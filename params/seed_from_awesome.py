@@ -29,7 +29,9 @@ try:
 except ImportError:
     sys.exit("需要 PyYAML：pip install pyyaml")
 
-DEFAULT_PROJECTS = "/home/zjk/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/01-样本池/_data/awesome-game-mashups.projects.json"
+DEFAULT_PROJECTS = os.environ.get("PT_PROJECTS") or os.path.normpath(os.path.join(
+    os.path.dirname(os.path.abspath(__file__)),
+    "..", "..", "01-样本池", "_data", "awesome-game-mashups.projects.json"))
 
 # 任务给定的硬约束：本项目零实机验证
 VERIFIED = False

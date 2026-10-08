@@ -4,6 +4,10 @@
 
 ## 目录结构（我理解的"这类项目该有的形状"）
 
+> **分发说明**：下列 `schema.v*.yaml` / `schema.teardown*.yaml` / `requests*.json` /
+> `t6_log*.jsonl` / `protocol/` / `tools/` 是本轮实验的**中间产物**，不随仓库分发
+> （它们是运行输出，或与 `stubs/` 下的交付脚本重复）。此处保留完整描述作为实验记录。
+
 ```
 T6-output/
 ├── README.md                  # pt_scaffold 生成：五件东西覆盖表

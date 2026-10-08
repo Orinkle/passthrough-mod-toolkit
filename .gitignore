@@ -12,3 +12,14 @@ dist/
 
 # scratch from verify runs
 /.scratch/
+
+# runtime artifacts — written by demo/verify runs, never part of the source
+/demo/demo_trace.json
+/stubs/demo_trace.json
+/mcp/smoke_log.jsonl
+/mcp/T6-output/*.jsonl
+/mcp/T6-output/requests*.json
+/mcp/T6-output/schema.v*.yaml
+/mcp/T6-output/schema.teardown*.yaml
+/mcp/T6-output/protocol/
+/mcp/T6-output/tools/

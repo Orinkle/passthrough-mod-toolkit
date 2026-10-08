@@ -100,11 +100,11 @@ seqlock 读写骨架、SPSC 环骨架。
 
 ## 7. 可复现命令
 
-解释器（绝对路径）：`/home/zjk/.workbuddy/binaries/python/envs/default/bin/python`
+解释器（绝对路径）：`python3`
 
 ```bash
-BASE=/home/zjk/WorkBuddy/2026-10-07-20-05-03/passthrough-lab
-PY=/home/zjk/.workbuddy/binaries/python/envs/default/bin/python
+BASE=<home>/WorkBuddy/2026-10-07-20-05-03/passthrough-lab
+PY=python3
 export PYTHONPATH=$BASE/03-复现路线/v1-ptgen/src
 
 # 生成五语言（默认取 schema 第一个词表）

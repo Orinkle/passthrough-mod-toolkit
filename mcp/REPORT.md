@@ -5,7 +5,7 @@
 - 实现方式：**手写 JSON-RPC over stdio**（官方 `mcp` SDK 未安装且禁止联网安装；stdio 传输即逐行 JSON-RPC 2.0，并兼容 Content-Length 分帧）。
 - 协议版本：默认 `2024-11-05`，同时接受 `2025-03-26` / `2025-06-18`（按客户端 `initialize` 回显）。
 - 工具数：**5**（新增 `pt_schema_describe`）；零额外依赖（仅需 PyYAML，环境已带 6.0.3）。
-- 解释器：`/home/zjk/.workbuddy/binaries/python/envs/default/bin/python`。
+- 解释器：`python3`。
 - 复现：`cd v2-mcp && <python> smoke.py` → 写出 `smoke_log.jsonl`（**19 条** request/response，ids 1–19）；
   本报告所有 request/response 均**摘录自该文件**，未手写。脚手架实测另见 §1.3 的两条命令与原始输出。
 - 硬约束遵守：**不启动游戏**；只写 `v2-mcp/`；round-trip 与 stub 都在 `v2-mcp/.work/` 隔离副本内跑，未改动 `v0-*/v1-*`。
@@ -68,7 +68,7 @@ request:
   "params": {
     "name": "pt_schema_validate",
     "arguments": {
-      "schema_path": "/home/zjk/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/03-复现路线/v2-mcp/.work/_probe/order_as_string_list.yaml"
+      "schema_path": "<home>/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/03-复现路线/v2-mcp/.work/_probe/order_as_string_list.yaml"
     }
   }
 }
@@ -78,7 +78,7 @@ response（解析 `content[0].text`；`structure.issues` 每项都带 path/expec
 {
   "tool": "pt_schema_validate",
   "ok": false,
-  "schema_path": "/home/zjk/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/03-复现路线/v2-mcp/.work/_probe/order_as_string_list.yaml",
+  "schema_path": "<home>/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/03-复现路线/v2-mcp/.work/_probe/order_as_string_list.yaml",
   "header_path": null,
   "structure": {
     "ok": false,
@@ -143,10 +143,10 @@ response（解析 `content[0].text`；`structure.issues` 每项都带 path/expec
     "stdout": [],
     "stderr": [
       "Traceback (most recent call last):",
-      "  File \"/home/zjk/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/03-复现路线/v2-mcp/.work/schema-cf4sxlba/mirror/03-复现路线/v0-schema/verify_roundtrip.py\", line 106, in <module>",
+      "  File \"<home>/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/03-复现路线/v2-mcp/.work/schema-cf4sxlba/mirror/03-复现路线/v0-schema/verify_roundtrip.py\", line 106, in <module>",
       "    main()",
       "    ~~~~^^",
-      "  File \"/home/zjk/WorkBuddy/202
+      "  File \"<home>/WorkBuddy/202
   …  （截断；完整见 smoke_log.jsonl 中 id=16）
 ```
 > 结果：`container.order` 与 `vocabulary_schema` **两条契约各自被点名**，各自带 expected/got/hint。
@@ -267,7 +267,7 @@ request（`header_path` = SkyCraft 真实头；schema 用默认 `v0-schema/schem
   "params": {
     "name": "pt_schema_validate",
     "arguments": {
-      "header_path": "/home/zjk/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/90-源码/SkyCraft/protocol/skycraft_protocol.h"
+      "header_path": "<home>/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/90-源码/SkyCraft/protocol/skycraft_protocol.h"
     }
   }
 }
@@ -277,8 +277,8 @@ response:
 {
   "tool": "pt_schema_validate",
   "ok": true,
-  "schema_path": "/home/zjk/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/03-复现路线/v0-schema/schema.yaml",
-  "header_path": "/home/zjk/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/90-源码/SkyCraft/protocol/skycraft_protocol.h",
+  "schema_path": "<home>/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/03-复现路线/v0-schema/schema.yaml",
+  "header_path": "<home>/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/90-源码/SkyCraft/protocol/skycraft_protocol.h",
   "structure": {
     "ok": true,
     "issues": [],
@@ -334,7 +334,7 @@ response:
     "exit_code": 0,
     "ok": true,
     "harness": "v0-schema/extract_vocab.py + gen_header.py（隔离镜像副本）",
-    "header_path": "/home/zjk/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/90-源码/SkyCraft/protocol/skycraft_pro
+    "header_path": "<home>/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/90-源码/SkyCraft/protocol/skycraft_pro
   …  （截断；完整见 smoke_log.jsonl 中 id=14）
 ```
 > `roundtrip.mode = "custom-header"`，`structural_diff = 0`，`conclusion = PASS`。**内置宿主的 0 差额是复现出来的，不是写死的。**
@@ -351,8 +351,8 @@ request 同 B-1 但 `schema_path` 指向该 schema：
   "params": {
     "name": "pt_schema_validate",
     "arguments": {
-      "schema_path": "/home/zjk/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/03-复现路线/v2-mcp/.work/_probe/perturbed_container.yaml",
-      "header_path": "/home/zjk/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/90-源码/SkyCraft/protocol/skycraft_protocol.h"
+      "schema_path": "<home>/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/03-复现路线/v2-mcp/.work/_probe/perturbed_container.yaml",
+      "header_path": "<home>/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/90-源码/SkyCraft/protocol/skycraft_protocol.h"
     }
   }
 }
@@ -362,8 +362,8 @@ response（截断）:
 {
   "tool": "pt_schema_validate",
   "ok": false,
-  "schema_path": "/home/zjk/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/03-复现路线/v2-mcp/.work/_probe/perturbed_container.yaml",
-  "header_path": "/home/zjk/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/90-源码/SkyCraft/protocol/skycraft_protocol.h",
+  "schema_path": "<home>/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/03-复现路线/v2-mcp/.work/_probe/perturbed_container.yaml",
+  "header_path": "<home>/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/90-源码/SkyCraft/protocol/skycraft_protocol.h",
   "structure": {
     "ok": true,
     "issues": [],
@@ -419,16 +419,16 @@ response（截断）:
     "exit_code": 0,
     "ok": false,
     "harness": "v0-schema/extract_vocab.py + gen_header.py（隔离镜像副本）",
-    "header_path": "/home/zjk/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/90-源码/SkyCraft/protocol/skycraft_protocol.h",
-    "schema_path": "/home/zjk/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/03-复现路线/v2-mcp/.work/_probe/perturbed_container.yaml",
+    "header_path": "<home>/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/90-源码/SkyCraft/protocol/skycraft_protocol.h",
+    "schema_path": "<home>/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/03-复现路线/v2-mcp/.work/_probe/perturbed_container.yaml",
     "extract": {
       "exit_code": 0,
-      "stdout": "wrote /home/zjk/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/03-复现路线/v2-mcp/.work/hdr-8p6z1dx6/extracted_vocab.yaml",
+      "stdout": "wrote <home>/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/03-复现路线/v2-mcp/.work/hdr-8p6z1dx6/extracted_vocab.yaml",
       "stderr": null
     },
     "generate": {
       "exit_code": 0,
-      "stdout": "wrote /home/zjk/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/03-复现路线/v2-m
+      "stdout": "wrote <home>/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/03-复现路线/v2-m
   …  （截断；完整见 smoke_log.jsonl 中 id=15）
 ```
 > 结果：`structural_diff = 2`，`counts_by_category = {"identifier":1,"literal":1,...}`，
@@ -480,9 +480,9 @@ response（截断 `does_not`）:
   "ok": true,
   "host": "teardown",
   "guest": "Minecraft: Java Edition",
-  "out_dir": "/home/zjk/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/03-复现路线/v2-mcp/.work/scaffold_teardown",
-  "schema_path": "/home/zjk/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/03-复现路线/v0-schema/schema.yaml",
-  "schema_used": "/home/zjk/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/03-复现路线/v2-mcp/.work/scaffold_teardown/schema.yaml",
+  "out_dir": "<home>/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/03-复现路线/v2-mcp/.work/scaffold_teardown",
+  "schema_path": "<home>/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/03-复现路线/v0-schema/schema.yaml",
+  "schema_used": "<home>/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/03-复现路线/v2-mcp/.work/scaffold_teardown/schema.yaml",
   "vocab": {
     "key": "teardown",
     "resolution": "new-host (own id; never aliased to a built-in)",
@@ -493,12 +493,12 @@ response（截断 `does_not`）:
     "protocol": {
       "cpp": {
         "exit_code": 0,
-        "stdout": "[cpp] wrote 439 lines -> /home/zjk/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/03-复现路线/v2-mcp/.work/scaffold_teardown/protocol/teardown.proto.h (+sync 57 lines)",
+        "stdout": "[cpp] wrote 439 lines -> <home>/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/03-复现路线/v2-mcp/.work/scaffold_teardown/protocol/teardown.proto.h (+sync 57 lines)",
         "stderr": null
       },
       "python": {
         "exit_code": 0,
-        "stdout": "[python] wrote 731 lines -> /home/zjk/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/03-复现路线/v2-mcp/.work/scaffold_teardown/protocol/teardown.proto.py",
+        "stdout": "[python] wrote 731 lines -> <home>/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/03-复现路线/v2-mcp/.work/scaffold_teardown/protocol/teardown.proto.py",
         "stderr": null
       }
     },
@@ -549,7 +549,7 @@ response（截断 `does_not`）:
 **复测证据 C-2 — 真把生成的脚本跑起来（① 骨架状态：给出可读的"缺什么"）**
 
 ```bash
-$ cd v2-mcp/.work/scaffold_teardown && /home/zjk/.workbuddy/binaries/python/envs/default/bin/python tools/run_demo.py
+$ cd v2-mcp/.work/scaffold_teardown && python3 tools/run_demo.py
 退出码: 2
 ```
 
@@ -557,7 +557,7 @@ stderr（**没有任何 traceback，也不再是 `unknown host 'SKY'`**）:
 ```text
 ==============================================================================
 [teardown] 未实现宿主适配器：host 'teardown' 的词表仍是 pt_scaffold 生成的骨架（占位值）。
-  schema : /home/zjk/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/03-复现路线/v2-mcp/.work/scaffold_teardown/schema.yaml
+  schema : <home>/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/03-复现路线/v2-mcp/.work/scaffold_teardown/schema.yaml
   本脚手架不臆造宿主词表——「填一张词表」正是接新宿主的固定成本，必须由你给真值。
 
   要补的东西：
@@ -581,7 +581,7 @@ stderr（**没有任何 traceback，也不再是 `unknown host 'SKY'`**）:
 我另做了一份"用户提供的"完整 schema（把 SKY 词表克隆到新键 `teardown` 下并重命名标识符），再 `pt_scaffold(schema_path=…)`：
 
 ```bash
-$ cd v2-mcp/.work/scaffold_teardown_full && /home/zjk/.workbuddy/binaries/python/envs/default/bin/python tools/run_demo.py
+$ cd v2-mcp/.work/scaffold_teardown_full && python3 tools/run_demo.py
 退出码: 0
 ```
 
@@ -710,7 +710,7 @@ response（截断）:
 {
   "tool": "pt_schema_validate",
   "ok": true,
-  "schema_path": "/home/zjk/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/03-复现路线/v0-schema/schema.yaml",
+  "schema_path": "<home>/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/03-复现路线/v0-schema/schema.yaml",
   "header_path": null,
   "structure": {
     "ok": true,
@@ -927,9 +927,9 @@ response（截断）:
   "ok": true,
   "host": "The Elder Scrolls V: Skyrim Special Edition",
   "guest": "Minecraft: Java Edition",
-  "out_dir": "/home/zjk/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/03-复现路线/v2-mcp/.work/scaffold_demo",
-  "schema_path": "/home/zjk/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/03-复现路线/v0-schema/schema.yaml",
-  "schema_used": "/home/zjk/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/03-复现路线/v2-mcp/.work/scaffold_demo/schema.yaml",
+  "out_dir": "<home>/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/03-复现路线/v2-mcp/.work/scaffold_demo",
+  "schema_path": "<home>/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/03-复现路线/v0-schema/schema.yaml",
+  "schema_used": "<home>/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/03-复现路线/v2-mcp/.work/scaffold_demo/schema.yaml",
   "vocab": {
     "key": "SKY",
     "resolution": "schema-field-match(skyrim)",
@@ -940,12 +940,12 @@ response（截断）:
     "protocol": {
       "cpp": {
         "exit_code": 0,
-        "stdout": "[cpp] wrote 519 lines -> /home/zjk/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/03-复现路线/v2-mcp/.work/scaffold_demo/protocol/SKY.proto.h (+sync 57 lines)",
+        "stdout": "[cpp] wrote 519 lines -> <home>/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/03-复现路线/v2-mcp/.work/scaffold_demo/protocol/SKY.proto.h (+sync 57 lines)",
         "stderr": null
       },
       "python": {
         "exit_code": 0,
-        "stdout": "[python] wrote 838 lines -> /home/zjk/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/03-复现路线/v2-mcp/.work/scaffold_demo/protocol/SKY.proto.py",
+        "stdout": "[python] wrote 838 lines -> <home>/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/03-复现路线/v2-mcp/.work/scaffold_demo/protocol/SKY.proto.py",
         "stderr": null
       }
     },

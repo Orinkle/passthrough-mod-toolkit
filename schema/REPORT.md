@@ -13,8 +13,8 @@
 验证命令（零结构差异即 PASS，否则 `sys.exit(1)`）：
 
 ```bash
-/home/zjk/.workbuddy/binaries/python/envs/default/bin/python \
-  /home/zjk/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/03-复现路线/v0-schema/verify_roundtrip.py
+python3 \
+  <home>/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/03-复现路线/v0-schema/verify_roundtrip.py
 ```
 
 ## 已被 schema 吃掉的真实差异（实测证据）
