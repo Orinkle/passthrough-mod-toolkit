@@ -324,7 +324,8 @@ by this toolkit, per our hard rule (see `RELEASE_CHECKLIST.md`, R3):
 
 ## License
 
-Released under the **MIT License** — see [`LICENSE`](LICENSE).
+Released under the **MIT License** — see [`LICENSE`](LICENSE). Third-party attributions are listed in
+[`THIRD-PARTY-NOTICES.md`](THIRD-PARTY-NOTICES.md).
 
 You may use, modify, and redistribute, including commercially, **provided you keep the
 copyright notices and the full license text** for the MIT components above. You may **not**

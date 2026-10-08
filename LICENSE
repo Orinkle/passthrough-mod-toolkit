@@ -19,14 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----
-
-Third-party components retained under their own licenses (MIT):
-- chasmlol/SkyCraft        — MIT. Copyright (c) chasmlol.
-- rehan-remade/universal-modder — MIT. Copyright (c) rehan-remade.
-  (examples/minecraft-gta5-passthrough is MIT,随主仓库.)
-
-This project does NOT bundle any game files, loader binaries (SKSE /
-ScriptHookV / ReShade), or code from no-license repositories
-(ValCraft, EldenKill, chasm-bridge-fnv).

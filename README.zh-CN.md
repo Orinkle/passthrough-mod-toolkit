@@ -162,5 +162,5 @@ python mcp/server.py               # 零依赖 MCP 服务器（JSON-RPC over std
 
 ## 许可
 
-**MIT License**——见 [`LICENSE`](LICENSE)。可商用，但须保留上述 MIT 组件的版权声明与全文许可；
+**MIT License**——见 [`LICENSE`](LICENSE)，第三方声明见 [`THIRD-PARTY-NOTICES.md`](THIRD-PARTY-NOTICES.md)。可商用，但须保留上述 MIT 组件的版权声明与全文许可；
 **不得**捆绑游戏文件、加载器二进制（SKSE / ScriptHookV / ReShade）或无许可项目的代码。
