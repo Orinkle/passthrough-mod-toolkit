@@ -1,0 +1,700 @@
+schema_version: 1
+container:
+  includes:
+  - '#include <cstdint>'
+  regions_template: '// ---- region offsets ---------------------------------------------------------------------
+
+    inline constexpr std::uint64_t kOffHeader = 0x0;
+
+    inline constexpr std::uint64_t {host_state_off} = 0x100;
+
+    inline constexpr std::uint64_t kOffMcState = 0x200;
+
+    inline constexpr std::uint64_t kOffOverlayCtl = 0x300;
+
+    inline constexpr std::uint64_t kOffOverlaySlotHdr = 0x340;  // 3 x 0x40
+
+    inline constexpr std::uint64_t kOffWaterGrid = 0x400;       // host -> MC, see WaterGrid
+
+    inline constexpr std::uint64_t kOffInputRing = 0x1000;
+
+    inline constexpr std::uint64_t kOffCollisionRing = 0x20000;
+
+    inline constexpr std::uint64_t kCollisionRingBytes = 32ull << 20;
+
+    inline constexpr std::uint64_t kOffOverlayPixels = kOffCollisionRing + kCollisionRingBytes;
+
+    inline constexpr std::uint32_t kMaxOverlayW = 3840;
+
+    inline constexpr std::uint32_t kMaxOverlayH = 2160;
+
+    inline constexpr std::uint64_t kOverlaySlotBytes = std::uint64_t(kMaxOverlayW) * kMaxOverlayH * 4;
+
+    inline constexpr std::uint32_t kOverlaySlots = 3;
+
+    inline constexpr std::uint64_t kOffActorTable = 0x12000;   // host -> MC, see ActorTable
+
+    inline constexpr std::uint64_t kOffEventRing = 0x17000;    // MC -> host, see McEvent
+
+    inline constexpr std::uint64_t kOffWorldEntities = 0x1C000;  // MC -> host, see WorldEntities
+
+    inline constexpr std::uint64_t kOffRenderRing = kOffOverlayPixels + kOverlaySlotBytes * kOverlaySlots;
+
+    inline constexpr std::uint64_t kRenderRingBytes = 64ull << 20;
+
+    inline constexpr std::uint64_t kMappingBytes = kOffRenderRing + kRenderRingBytes;
+
+    '
+  fixed:
+    watergrid: "// ---- host water grid (seqlock like host state) ----------------------------------------\n\
+      inline constexpr std::uint32_t kWaterGridSize = 16;\ninline constexpr float         kNoWater = -1.0e30f;\n\
+      \nstruct WaterGrid\n{\n  std::uint32_t seq;\n  std::int32_t  originX, originZ;  // Minecraft block\
+      \ column of surface[0]\n  std::uint32_t worldId;           // as in host state\n  float        \
+      \ surface[kWaterGridSize * kWaterGridSize];  // [z * size + x]: MC y of the water surface; kNoWater:\
+      \ none\n};\nstatic_assert(sizeof(WaterGrid) <= 0xC00);\n"
+    overlay: "// ---- overlay triple buffer @0x300 --------------------------------------------------------\n\
+      inline constexpr std::uint32_t kOverlayDirty = 1u << 2;\n\nstruct OverlayCtl\n{\n  std::uint32_t\
+      \ state;\n  std::uint32_t pad;\n  std::uint64_t framesPublished;\n};\n\nstruct OverlaySlotHdr\n\
+      {\n  std::uint32_t width;\n  std::uint32_t height;\n  std::uint32_t flags;  // bit0: rows are bottom-up\n\
+      \  std::uint32_t pad;\n  std::uint64_t frameId;\n  std::uint8_t  reserved[0x40 - 0x18];\n};\nstatic_assert(sizeof(OverlaySlotHdr)\
+      \ == 0x40);\n"
+    input_ring_offsets: '// ---- input ring @0x1000 (host produces, MC consumes) ----------------------------------
+
+      inline constexpr std::uint32_t kInputRingEntries = 4096;  // power of two
+
+      inline constexpr std::uint64_t kInputRingHeadOff = 0x00;  // u64, written by host
+
+      inline constexpr std::uint64_t kInputRingTailOff = 0x40;  // u64, written by MC
+
+      inline constexpr std::uint64_t kInputRingDataOff = 0x80;
+
+      '
+    hurtkind: "enum HurtKind : std::uint16_t\n{\n  kHurtMelee = 0,\n  kHurtProjectile = 1,\n  kHurtMagic\
+      \ = 2,\n  kHurtOther = 3,\n};\n"
+    actor: "// ---- actor table @0x12000 (host -> MC, seqlock) ----------------------------------------\n\
+      inline constexpr std::uint32_t kMaxActors = 256;\n\nenum ActorFlags : std::uint32_t\n{\n  kActorHostile\
+      \ = 1u << 0,    // hostile to the player right now\n  kActorDead = 1u << 1,\n  kActorEssential =\
+      \ 1u << 2,\n  kActorInCombat = 1u << 3,\n};\n\nstruct ActorRecord\n{\n  std::uint32_t formId;\n\
+      \  std::uint32_t flags;       // ActorFlags\n  float         x, y, z;     // feet, MC coords\n \
+      \ float         yaw;         // MC degrees\n  float         width;       // blocks\n  float    \
+      \     height;      // blocks\n  float         healthFrac;  // 0..1\n  std::uint16_t level;\n  std::uint16_t\
+      \ pad;\n  char          name[24];    // display name, UTF-8, NUL-terminated (truncated)\n};\nstatic_assert(sizeof(ActorRecord)\
+      \ == 64);\n\nstruct ActorTable\n{\n  std::uint32_t seq;\n  std::uint32_t count;\n  std::uint8_t\
+      \  pad[0x40 - 8];\n  ActorRecord   actors[kMaxActors];\n};\nstatic_assert(sizeof(ActorTable) ==\
+      \ 0x40 + 64 * kMaxActors);\n"
+    event_ring_offsets: '// ---- event ring @0x17000 (MC -> host) ---------------------------------------------------
+
+      inline constexpr std::uint32_t kEventRingEntries = 512;  // power of two
+
+      inline constexpr std::uint64_t kEventRingHeadOff = 0x00;  // u64, written by MC
+
+      inline constexpr std::uint64_t kEventRingTailOff = 0x40;  // u64, written by host
+
+      inline constexpr std::uint64_t kEventRingDataOff = 0x80;
+
+      '
+    hitflags: "enum HitFlags : std::uint32_t\n{\n  kHitCritical = 1u << 0,\n  kHitProjectile = 1u << 1,\n\
+      \  kHitSweep = 1u << 2,\n  kHitFire = 1u << 3,\n};\n"
+    hitweapon: "enum HitWeapon : std::uint32_t\n{\n  kWeaponUnarmed = 0,\n  kWeaponBlade = 1,   // swords\n\
+      \  kWeaponAxe = 2,\n  kWeaponBlunt = 3,   // maces, pickaxes, shovels, hoes, anything else held\n\
+      \  kWeaponPierce = 4,  // tridents, spears\n  kWeaponArrow = 5,   // arrows and other projectiles\n\
+      };\n"
+    mcevent: "struct McEvent\n{\n  std::uint32_t type;\n  std::uint32_t formId;\n  float         a, b,\
+      \ c, d;\n  std::uint32_t flags;\n  std::uint32_t weapon;  // HitWeapon for kEvHitActor\n};\nstatic_assert(sizeof(McEvent)\
+      \ == 32);\n"
+    worldentities: "// ---- world entities @0x1C000 (MC -> host, seqlock) -------------------------------------\n\
+      inline constexpr std::uint32_t kMaxWorldEntities = 160;\n\nenum WorldEntityKind : std::uint32_t\n\
+      {\n  kWeArrow = 1,    // uv[0]: the arrow's item icon\n  kWeItem = 2,     // dropped/thrown item:\
+      \ a flat sprite (uv[0]) turning about the vertical\n  kWeTrident = 3,  // uv[0]: the trident's item\
+      \ icon\n  kWeBlock = 4,    // dropped block item: a spinning cube of side `scale`, uv[0..2] = side,\
+      \ top, bottom\n  kWeCrack = 5,    // block-breaking cracks over the box at (x, y, z) of size ext,\
+      \ uv[0] = crack stage\n  kWeShadow = 6,   // a player's or mob's feet at (x, y, z), `scale` wide:\
+      \ its soft contact shadow\n};\n\nstruct WorldEntity\n{\n  std::uint32_t kind;        // WorldEntityKind\n\
+      \  std::uint32_t id;          // MC entity id (stable while it exists)\n  float         x, y, z;\
+      \     // MC coords (interpolated at MC's render time)\n  float         yaw, pitch;  // MC degrees\n\
+      \  float         scale;\n  float         ext[3];      // kWeCrack: box size\n  float         uv[3][4];\
+      \    // atlas rects {u0, v0, u1, v1}\n  std::uint32_t tint;        // RGBA8 multiplier for the top\
+      \ face (grass, leaves); 0 = none\n};\nstatic_assert(sizeof(WorldEntity) == 96);\n\nstruct WorldEntities\n\
+      {\n  std::uint32_t seq;\n  std::uint32_t count;\n  std::uint32_t hasSelection;           // draw\
+      \ an outline around the targeted block\n  float         selMin[3], selMax[3];   // MC coords\n \
+      \ std::uint8_t  pad[0x40 - 36];\n  WorldEntity   entities[kMaxWorldEntities];\n};\nstatic_assert(sizeof(WorldEntities)\
+      \ == 0x40 + sizeof(WorldEntity) * kMaxWorldEntities);\nstatic_assert(kOffWorldEntities + sizeof(WorldEntities)\
+      \ <= kOffCollisionRing);\n"
+    render_ring_offsets: '// ---- render ring (MC -> host) -----------------------------------------------------------
+
+      inline constexpr std::uint64_t kRenRingHeadOff = 0x00;
+
+      inline constexpr std::uint64_t kRenRingTailOff = 0x40;
+
+      inline constexpr std::uint64_t kRenRingDataOff = 0x80;
+
+      inline constexpr std::uint64_t kRenRingDataBytes = kRenderRingBytes - kRenRingDataOff;
+
+      '
+    rensolids: "struct RenSolids\n{\n  std::int32_t  sx, sy, sz;  // section coords, as in RenSection\n\
+      \  std::uint32_t count;       // solid blocks (0: none, and no bitset follows)\n};\n"
+    ren_dug: "struct RenDug\n{\n  std::int32_t  sx, sy, sz;  // section coords, as in RenSection\n  std::uint32_t\
+      \ count;       // dug blocks (0: none, and no bitset follows)\n  std::uint32_t worldId;     // the\
+      \ host world (host state::worldId) the bits belong to\n  std::uint32_t pad;\n};\nstatic_assert(sizeof(RenDug)\
+      \ == 24);\n"
+    ragdollpart: "enum RagdollPart : std::uint32_t\n{\n  kPartNone = 0,\n  kPartHead = 1,\n  kPartBody\
+      \ = 2,\n  kPartRightArm = 3,\n  kPartLeftArm = 4,\n  kPartRightLeg = 5,\n  kPartLeftLeg = 6,\n \
+      \ kPartCount = 7,\n};\n"
+    renlights: "struct RenLights\n{\n  std::int32_t  sx, sy, sz;  // section coords, as in RenSection\n\
+      \  std::uint32_t count;\n};\n"
+    lightkind: "enum LightKind : std::uint8_t\n{\n  kLightSteady = 0,\n  kLightFlame = 1,  // torches,\
+      \ fire, campfires, candles: flicker\n  kLightLava = 2,   // lava, magma: a slow glow\n};\n"
+    blockhazard: "enum BlockHazard : std::uint8_t\n{\n  kHazardNone = 0,\n  kHazardFire = 1,   // fire,\
+      \ soul fire, campfires: burns what stands in it\n  kHazardLava = 2,   // lava: burns hard\n  kHazardMagma\
+      \ = 3,  // magma block: hurts what stands on top of it\n};\n"
+    renlight: "struct RenLight\n{\n  std::uint8_t  x, y, z;  // block within the section\n  std::uint8_t\
+      \  level;    // Minecraft light emission, 1-15\n  std::uint32_t color;    // RGB8 (r low byte);\
+      \ top byte: LightKind in bits 0-3, BlockHazard in 4-7\n};\nstatic_assert(sizeof(RenLight) == 8);\n"
+    renatlasregion: "struct RenAtlasRegion\n{\n  std::uint32_t x, y, width, height;  // pixels in the\
+      \ combined atlas (kRenAtlas)\n};\n"
+    renscene: "struct RenScene\n{\n  double        originX, originY, originZ;  // MC block the positions\
+      \ are relative to\n  std::uint32_t batchCount;\n  std::uint32_t vertexCount;\n};\n"
+    rentexture: "struct RenTexture\n{\n  std::uint32_t id;  // 1+, referenced by RenBatch::texture\n \
+      \ std::uint32_t width, height;\n  std::uint32_t pad;\n};\n"
+    renavatar: "struct RenAvatar\n{\n  std::uint32_t batchCount;\n  std::uint32_t vertexCount;\n};\n"
+    renbatch: "struct RenBatch\n{\n  std::uint32_t texture;  // 0: the block/item atlas, else a RenTexture\
+      \ id\n  std::uint32_t first;    // first vertex\n  std::uint32_t count;    // vertices (multiple\
+      \ of 3)\n  std::uint32_t flags;    // bit0: translucent (blended, after the solid pass; casts no\
+      \ shadow)\n};\n"
+    renatlas: "struct RenAtlas\n{\n  std::uint32_t width, height;\n};\n"
+    rensection: "struct RenSection\n{\n  std::int32_t  sx, sy, sz;   // section coords (16-block cubes)\n\
+      \  std::uint32_t vertexCount;  // multiple of 3\n};\n"
+    renvertex: "struct RenVertex\n{\n  float         x, y, z;  // MC coords relative to the section origin\
+      \ (sx*16, sy*16, sz*16)\n  float         u, v;     // atlas UV\n  std::uint32_t color;    // RGBA8\
+      \ (tint * ambient occlusion; Minecraft's fixed face shading is left out)\n  std::uint32_t light;\
+      \    // low byte: block light 0-15, next byte: sky light 0-15\n  std::uint32_t flags;    // bit0:\
+      \ cutout (alpha test), bit1: translucent,\n                          // bits 4-6: face normal as\
+      \ MC Direction ordinal + 1 (0 = none: lit without a normal)\n};\nstatic_assert(sizeof(RenVertex)\
+      \ == 32);\n"
+    inputevent: "struct InputEvent\n{\n  std::uint16_t type;\n  std::uint16_t code;\n  std::int32_t  a;\n\
+      \  std::int32_t  b;\n  std::int32_t  c;\n};\nstatic_assert(sizeof(InputEvent) == 16);\n"
+    collision_ring_offsets: '// ---- collision ring @0x20000 (host produces, MC consumes) -----------------------------
+
+      inline constexpr std::uint64_t kColRingHeadOff = 0x00;  // u64 total bytes written
+
+      inline constexpr std::uint64_t kColRingTailOff = 0x40;  // u64 total bytes consumed
+
+      inline constexpr std::uint64_t kColRingDataOff = 0x80;
+
+      inline constexpr std::uint64_t kColRingDataBytes = kCollisionRingBytes - kColRingDataOff;
+
+      '
+    coltype: "enum ColType : std::uint32_t\n{\n  kColPad = 0,\n  kColClear = 1,   // payload: u32 epoch\n\
+      \  kColRegion = 2,  // payload: ColRegion + ColBlock[count]\n  kColTris = 3,    // payload: ColRegion\
+      \ (count = triangles) + ColTri[count]; sent before kColRegion\n};\n"
+    coltri: "struct ColTri\n{\n  float         v[9];\n  std::uint32_t flags;\n};\nstatic_assert(sizeof(ColTri)\
+      \ == 40);\n"
+    colmsgheader: "struct ColMsgHeader\n{\n  std::uint32_t type;\n  std::uint32_t payloadBytes;\n};\n"
+    colregion: "struct ColRegion\n{\n  std::int32_t  minX, minY, minZ;\n  std::int32_t  maxX, maxY, maxZ;\n\
+      \  std::uint32_t epoch;\n  std::uint32_t count;\n};\nstatic_assert(sizeof(ColRegion) == 32);\n"
+    colblock: "struct ColBlock\n{\n  std::int32_t  x, y, z;\n  std::uint32_t pad;\n  std::uint64_t bits[8];\n\
+      };\nstatic_assert(sizeof(ColBlock) == 80);\n"
+  order:
+  - kind: regions
+  - kind: var
+    key: header
+  - kind: var
+    key: host_flags
+  - kind: fixed
+    key: watergrid
+  - kind: var
+    key: host_state
+  - kind: var
+    key: mc_flags
+  - kind: var
+    key: mc_state
+  - kind: fixed
+    key: overlay
+  - kind: fixed
+    key: input_ring_offsets
+  - kind: var
+    key: input_type
+  - kind: fixed
+    key: hurtkind
+  - kind: var
+    key: hurt_flags
+  - kind: fixed
+    key: actor
+  - kind: fixed
+    key: event_ring_offsets
+  - kind: var
+    key: mc_event_type
+  - kind: optional
+    key: tool_kind
+  - kind: fixed
+    key: hitflags
+  - kind: fixed
+    key: hitweapon
+  - kind: fixed
+    key: mcevent
+  - kind: fixed
+    key: worldentities
+  - kind: fixed
+    key: render_ring_offsets
+  - kind: var
+    key: ren_type
+  - kind: fixed
+    key: rensolids
+  - kind: optional
+    key: ren_dug
+  - kind: optional
+    key: dig_material
+  - kind: fixed
+    key: ragdollpart
+  - kind: fixed
+    key: renlights
+  - kind: fixed
+    key: lightkind
+  - kind: fixed
+    key: blockhazard
+  - kind: fixed
+    key: renlight
+  - kind: fixed
+    key: renatlasregion
+  - kind: fixed
+    key: renscene
+  - kind: fixed
+    key: rentexture
+  - kind: fixed
+    key: renavatar
+  - kind: fixed
+    key: renbatch
+  - kind: fixed
+    key: renatlas
+  - kind: fixed
+    key: rensection
+  - kind: fixed
+    key: renvertex
+  - kind: fixed
+    key: inputevent
+  - kind: fixed
+    key: collision_ring_offsets
+  - kind: fixed
+    key: coltype
+  - kind: var
+    key: col_tri_flags
+  - kind: fixed
+    key: coltri
+  - kind: fixed
+    key: colmsgheader
+  - kind: fixed
+    key: colregion
+  - kind: fixed
+    key: colblock
+vocabulary_schema:
+  namespace: C++ namespace, e.g. skycraft::proto
+  host_abbr: 'Sky | Val  (drives host-state struct/enum names: SkyState/SkyFlags, ValState/ValFlags, and
+    Header pid/heartbeat field names)'
+  magic: hex literal, e.g. 0x43594B53
+  version: integer
+  mapping_name: wchar string, e.g. Local\SkyCraft_v1
+  units_per_block: double literal, e.g. 70.0 or 1.0
+  host_flags: enum members [{name, value}]  (value is the RHS expression, e.g. '1u << 0', or null for
+    auto)
+  host_state: '{ fields: [decl lines], size: ''0x40''|''0xC0''|''0x90'', ground_grid: null|int }'
+  mc_flags: enum members [{name, value}]
+  mc_state: '{ fields: [decl lines], size: ''0xC8''|''0x100'' }'
+  input_type: enum members [{name, value}]  (underlying std::uint16_t)
+  hurt_flags: enum members [{name, value}]
+  mc_event_type: enum members [{name, value}]
+  ren_type: enum members [{name, value}]
+  col_tri_flags: '{ members: [{name, value}], has_shift: bool }'
+  dig_material: null  OR  enum members [{name, value}]  (underlying std::uint8_t)
+  ren_dug: bool  (whether struct RenDug is present)
+  tool_kind: null  OR  enum members [{name, value}]
+vocabularies:
+  SKY:
+    namespace: skycraft::proto
+    host_abbr: Sky
+    host_prefix: skyrim
+    magic: '0x43594B53'
+    version: 11
+    mapping_name: Local\\SkyCraft_v1
+    units_per_block: '70.0'
+    host_flags:
+    - name: kSkyInGame
+      value: 1u << 0
+    - name: kSkyMenuOpen
+      value: 1u << 1
+    - name: kSkyLoading
+      value: 1u << 2
+    host_state:
+      fields:
+      - std::uint32_t seq;
+      - std::uint32_t flags;
+      - std::uint32_t worldId;
+      - std::uint32_t collisionEpoch;
+      - double        posX, posY, posZ;
+      - float         yaw, pitch;
+      - std::uint32_t teleportSeq;
+      - std::uint32_t viewportW, viewportH;
+      - float         gameHour;
+      size: '0x40'
+      ground_grid: null
+    mc_flags:
+    - name: kMcInWorld
+      value: 1u << 0
+    - name: kMcScreenOpen
+      value: 1u << 1
+    - name: kMcOnGround
+      value: 1u << 2
+    - name: kMcSneaking
+      value: 1u << 3
+    - name: kMcSprinting
+      value: 1u << 4
+    - name: kMcDead
+      value: 1u << 5
+    - name: kMcSwimming
+      value: 1u << 6
+    - name: kMcFlying
+      value: 1u << 7
+    mc_state:
+      fields:
+      - std::uint32_t seq;
+      - std::uint32_t flags;
+      - double        x, y, z;
+      - float         yaw, pitch;
+      - float         eyeHeight;
+      - float         sensitivity;
+      - std::uint32_t teleportAck;
+      - std::uint32_t guiScale;
+      - std::uint64_t frameCounter;
+      - float         fovDeg;
+      - float         bobPhase;
+      - float         bobAmount;
+      - std::uint32_t pad4C;
+      - double        eyeX, eyeY, eyeZ;
+      - std::int64_t tickQpc;
+      - double       prevX, prevY, prevZ;
+      - double       curX, curY, curZ;
+      - float        tickEyeO, tickEye;
+      - float        walkDistO, walkDist;
+      - float        bobO, bob;
+      - float        tickMs;
+      - std::uint32_t tickPad;
+      - std::uint32_t cameraMode;
+      - float         cameraDistance;
+      size: '0xC8'
+    input_type:
+    - name: kInKey
+      value: '1'
+    - name: kInMouseButton
+      value: '2'
+    - name: kInScroll
+      value: '3'
+    - name: kInCursor
+      value: '4'
+    - name: kInText
+      value: '5'
+    - name: kInReleaseAll
+      value: '6'
+    - name: kInHurt
+      value: '7'
+    - name: kInOpenMenu
+      value: '8'
+    hurt_flags:
+    - name: kHurtBlockedInSkyrim
+      value: 1u << 0
+    - name: kHurtPowerAttack
+      value: 1u << 1
+    mc_event_type:
+    - name: kEvHitActor
+      value: '1'
+    - name: kEvPlayerDied
+      value: '2'
+    - name: kEvExplosion
+      value: '3'
+    - name: kEvArrowStuck
+      value: '4'
+    - name: kEvSkillUse
+      value: '5'
+    ren_type:
+    - name: kRenPad
+      value: '0'
+    - name: kRenAtlas
+      value: '1'
+    - name: kRenSection
+      value: '2'
+    - name: kRenClearAll
+      value: '3'
+    - name: kRenTexture
+      value: '4'
+    - name: kRenAvatar
+      value: '5'
+    - name: kRenScene
+      value: '6'
+    - name: kRenAtlasRegion
+      value: '7'
+    - name: kRenLights
+      value: '8'
+    - name: kRenSolids
+      value: '10'
+    - name: kRenDug
+      value: '11'
+    - name: kRenRagdoll
+      value: '9'
+    col_tri_flags:
+      members:
+      - name: kTriStairHelper
+        value: 1u << 0
+      - name: kTriDiggable
+        value: 1u << 1
+      - name: kTriGhost
+        value: 1u << 2
+      - name: kTriTerrain
+        value: 1u << 3
+      has_shift: true
+    dig_material:
+    - name: kDigNone
+      value: '0'
+    - name: kDigGrass
+      value: '1'
+    - name: kDigDirt
+      value: '2'
+    - name: kDigStone
+      value: '3'
+    - name: kDigCobble
+      value: '4'
+    - name: kDigSnow
+      value: '5'
+    - name: kDigIce
+      value: '6'
+    - name: kDigSand
+      value: '7'
+    - name: kDigGravel
+      value: '8'
+    - name: kDigMud
+      value: '9'
+    - name: kDigOakLog
+      value: '10'
+    - name: kDigSpruceLog
+      value: '11'
+    - name: kDigBirchLog
+      value: '12'
+    - name: kDigPlanks
+      value: '13'
+    - name: kDigMetal
+      value: '14'
+    - name: kDigGlass
+      value: '15'
+    - name: kDigOrganic
+      value: '16'
+    - name: kDigCloth
+      value: '17'
+    - name: kDigBone
+      value: '18'
+    - name: kDigWeb
+      value: '19'
+    - name: kDigAsh
+      value: '20'
+    - name: kDigBedrock
+      value: '21'
+    - name: kDigMaterialCount
+      value: null
+    ren_dug: true
+    tool_kind: null
+  FO4:
+    namespace: skycraft::proto
+    host_abbr: Sky
+    host_prefix: skyrim
+    magic: '0x43594B53'
+    version: 11
+    mapping_name: Local\\SkyCraft_v1
+    units_per_block: '70.0'
+    host_flags:
+    - name: kSkyInGame
+      value: 1u << 0
+    - name: kSkyMenuOpen
+      value: 1u << 1
+    - name: kSkyLoading
+      value: 1u << 2
+    host_state:
+      fields:
+      - std::uint32_t seq;
+      - std::uint32_t flags;
+      - std::uint32_t worldId;
+      - std::uint32_t collisionEpoch;
+      - double        posX, posY, posZ;
+      - float         yaw, pitch;
+      - std::uint32_t teleportSeq;
+      - std::uint32_t viewportW, viewportH;
+      - float         gameHour;
+      - float         groundX0, groundZ0, groundStep;
+      - std::uint32_t groundN;
+      - float         groundY[25];
+      - std::uint8_t  special[7];
+      - std::uint8_t  specialValid;
+      - std::uint8_t  groundPad[0x04];
+      size: '0xC0'
+      ground_grid: 5
+    mc_flags:
+    - name: kMcInWorld
+      value: 1u << 0
+    - name: kMcScreenOpen
+      value: 1u << 1
+    - name: kMcOnGround
+      value: 1u << 2
+    - name: kMcSneaking
+      value: 1u << 3
+    - name: kMcSprinting
+      value: 1u << 4
+    - name: kMcDead
+      value: 1u << 5
+    - name: kMcSwimming
+      value: 1u << 6
+    - name: kMcFlying
+      value: 1u << 7
+    - name: kMcHealthValid
+      value: 1u << 8
+    mc_state:
+      fields:
+      - std::uint32_t seq;
+      - std::uint32_t flags;
+      - double        x, y, z;
+      - float         yaw, pitch;
+      - float         eyeHeight;
+      - float         sensitivity;
+      - std::uint32_t teleportAck;
+      - std::uint32_t guiScale;
+      - std::uint64_t frameCounter;
+      - float         fovDeg;
+      - float         bobPhase;
+      - float         bobAmount;
+      - float         health;
+      - double        eyeX, eyeY, eyeZ;
+      - std::int64_t tickQpc;
+      - double       prevX, prevY, prevZ;
+      - double       curX, curY, curZ;
+      - float        tickEyeO, tickEye;
+      - float        walkDistO, walkDist;
+      - float        bobO, bob;
+      - float        tickMs;
+      - std::uint32_t tickPad;
+      - std::uint32_t cameraMode;
+      - float         cameraDistance;
+      size: '0xC8'
+    input_type:
+    - name: kInKey
+      value: '1'
+    - name: kInMouseButton
+      value: '2'
+    - name: kInScroll
+      value: '3'
+    - name: kInCursor
+      value: '4'
+    - name: kInText
+      value: '5'
+    - name: kInReleaseAll
+      value: '6'
+    - name: kInHurt
+      value: '7'
+    - name: kInOpenMenu
+      value: '8'
+    - name: kInScavenge
+      value: '9'
+    hurt_flags:
+    - name: kHurtBlockedInSkyrim
+      value: 1u << 0
+    - name: kHurtPowerAttack
+      value: 1u << 1
+    mc_event_type:
+    - name: kEvHitActor
+      value: '1'
+    - name: kEvPlayerDied
+      value: '2'
+    - name: kEvExplosion
+      value: '3'
+    - name: kEvArrowStuck
+      value: '4'
+    - name: kEvSkillUse
+      value: '5'
+    ren_type:
+    - name: kRenPad
+      value: '0'
+    - name: kRenAtlas
+      value: '1'
+    - name: kRenSection
+      value: '2'
+    - name: kRenClearAll
+      value: '3'
+    - name: kRenTexture
+      value: '4'
+    - name: kRenAvatar
+      value: '5'
+    - name: kRenScene
+      value: '6'
+    - name: kRenAtlasRegion
+      value: '7'
+    - name: kRenLights
+      value: '8'
+    - name: kRenSolids
+      value: '10'
+    - name: kRenDug
+      value: '11'
+    - name: kRenRagdoll
+      value: '9'
+    col_tri_flags:
+      members:
+      - name: kTriStairHelper
+        value: 1u << 0
+      - name: kTriDiggable
+        value: 1u << 1
+      - name: kTriGhost
+        value: 1u << 2
+      - name: kTriTerrain
+        value: 1u << 3
+      has_shift: true
+    dig_material:
+    - name: kDigNone
+      value: '0'
+    - name: kDigGrass
+      value: '1'
+    - name: kDigDirt
+      value: '2'
+    - name: kDigStone
+      value: '3'
+    - name: kDigCobble
+      value: '4'
+    - name: kDigSnow
+      value: '5'
+    - name: kDigIce
+      value: '6'
+    - name: kDigSand
+      value: '7'
+    - name: kDigGravel
+      value: '8'
+    - name: kDigMud
+      value: '9'
+    - name: kDigOakLog
+      value: '10'
+    - name: kDigSpruceLog
+      value: '11'
+    - name: kDigBirchLog
+      value: '12'
+    - name: kDigPlanks
+      value: '13'
+    - name: kDigMetal
+      value: '14'
+    - name: kDigGlass
+      value: '15'
+    - name: kDigOrganic
+      value: '16'
+    - name: kDigCloth
+      value: '17'
+    - name: kDigBone
+      value: '18'
+    - name: kDigWeb
+      value: '19'
+    - name: kDigAsh
+      value: '20'
+    - name: kDigBedrock
+      value: '21'
+    - name: kDigMaterialCount
+      value: null
+    ren_dug: true
+    tool_kind: null

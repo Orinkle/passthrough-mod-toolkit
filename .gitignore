@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+/out/
+.work/
+
+# regenerable outputs (examples/generated/ IS shipped — do not ignore that one)
+/schema/generated/
+/stubs/generated/
+
+# scratch from verify runs
+/.scratch/

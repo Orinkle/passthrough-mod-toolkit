@@ -1,0 +1,182 @@
+meta:
+  generated_by: seed_from_awesome.py
+  filter: approach contains 'passthrough' OR 'shared memory'
+  source_dataset: bailo167/awesome-game-mashups (CC0-1.0)
+  count: 9
+  verified_on_hardware: false
+  note: 骨架记录，具体参数见 params.yaml 的 params 段；loader 待补。
+seeds:
+- id: falloutcraft
+  name: FalloutCraft
+  host: Fallout 4
+  guest:
+  - 'Minecraft: Java Edition 26.3 (Fabric)'
+  - 'Minecraft: Java Edition 1.21.1 (NeoForge)'
+  license: MIT
+  repo: zeyvu/FalloutCraft
+  source_url: https://github.com/zeyvu/FalloutCraft
+  loader: null
+  loader_hint: F4SE plugin + Minecraft Fabric mod using shared memory
+  category: core
+  status:
+  - released
+  - source-available
+  - experimental
+  evidence: repo
+  verified_on_hardware: false
+  source_commit: cbe85e89f781cfb1db819d13fe8af7656ec12204
+  sha_fetch_note: null
+- id: killcraft
+  name: Killcraft
+  host: ULTRAKILL
+  guest:
+  - 'Minecraft: Java Edition'
+  license: MIT
+  repo: goonsn/Killcraft
+  source_url: https://github.com/goonsn/Killcraft
+  loader: null
+  loader_hint: ULTRAKILL BepInEx plugin + SkyCraft Minecraft guest over shared memory
+  category: core
+  status:
+  - released
+  - source-available
+  - experimental
+  evidence: repo
+  verified_on_hardware: false
+  source_commit: 5137641408aaf677bb3af30a9306d5292572a02f
+  sha_fetch_note: null
+- id: libertycraft
+  name: LibertyCraft
+  host: Grand Theft Auto IV
+  guest:
+  - 'Minecraft: Java Edition 26.3'
+  license: MIT
+  repo: mrborghini/libertycraft
+  source_url: https://github.com/mrborghini/libertycraft
+  loader: null
+  loader_hint: GTA IV ASI plugin + SkyCraft-derived Fabric mod over shared memory
+  category: core
+  status:
+  - source-available
+  - verified-wip
+  - experimental
+  evidence: repo
+  verified_on_hardware: false
+  source_commit: 0fe0f2c9aae2ba974cb077e282b091a38f1ca48f
+  sha_fetch_note: null
+- id: minecraft-crossover-bridge
+  name: Minecraft Crossover Bridge
+  host: 'Monster Hunter: World / Elden Ring via CrossOver on Apple Silicon macOS'
+  guest:
+  - 'Minecraft: Java Edition 1.21.1'
+  license: MIT
+  repo: justbustin/minecraft-crossover-bridge
+  source_url: https://github.com/justbustin/minecraft-crossover-bridge
+  loader: null
+  loader_hint: Fabric + native Windows bridge DLLs + shared memory + frame/depth compositing
+  category: core
+  status:
+  - source-available
+  - verified-wip
+  evidence: repo
+  verified_on_hardware: false
+  source_commit: d1723873ec8f370389cf19f74fac455b9e581321
+  sha_fetch_note: null
+- id: new-vegascraft
+  name: New VegasCraft
+  host: 'Fallout: New Vegas'
+  guest:
+  - 'Minecraft: Java Edition 26.3'
+  license: null
+  repo: Davozh/new-vegascraft
+  source_url: https://github.com/Davozh/new-vegascraft
+  loader: null
+  loader_hint: xNVSE + ReShade + Fabric passthrough
+  category: core
+  status:
+  - source-available
+  - verified-wip
+  - experimental
+  evidence: repo
+  verified_on_hardware: false
+  source_commit: null
+  sha_fetch_note: non-MIT / no license -> 未拉 SHA
+- id: owcraft
+  name: OWCraft
+  host: Outer Wilds
+  guest:
+  - 'Minecraft: Java Edition 26.3'
+  license: MIT
+  repo: Yaekai/OWCraft
+  source_url: https://github.com/Yaekai/OWCraft
+  loader: null
+  loader_hint: Outer Wilds Mod Loader host + SkyCraft-derived Fabric guest over shared
+    memory
+  category: core
+  status:
+  - released
+  - source-available
+  - experimental
+  evidence: repo
+  verified_on_hardware: false
+  source_commit: cd5f0613e1de04c537e7db28a5813b0329cfbfa9
+  sha_fetch_note: null
+- id: skycraft
+  name: SkyCraft
+  host: 'The Elder Scrolls V: Skyrim Special Edition'
+  guest:
+  - 'Minecraft: Java Edition'
+  license: MIT
+  repo: chasmlol/SkyCraft
+  source_url: https://github.com/chasmlol/SkyCraft
+  loader: null
+  loader_hint: Skyrim SKSE plugin + Minecraft Fabric mod communicating via shared
+    memory
+  category: core
+  status:
+  - released
+  - source-available
+  - experimental
+  evidence: repo
+  verified_on_hardware: false
+  source_commit: bfcaf178524b92c2cdeb88e4ce0f13ef9ded6f32
+  sha_fetch_note: null
+- id: subcraft
+  name: SubCraft
+  host: Subnautica
+  guest:
+  - 'Minecraft: Java Edition 1.21.1'
+  license: MIT
+  repo: FumperForrest/SubCraft
+  source_url: https://github.com/FumperForrest/SubCraft
+  loader: null
+  loader_hint: NeoForge Minecraft guest + Subnautica BepInEx host over shared memory
+  category: core
+  status:
+  - source-available
+  - verified-wip
+  - experimental
+  evidence: repo
+  verified_on_hardware: false
+  source_commit: 26a936d73e723e2e611666ef80b2d9a980cb1292
+  sha_fetch_note: null
+- id: valcraft
+  name: ValCraft
+  host: Valheim
+  guest:
+  - 'Minecraft: Java Edition 26.3'
+  license: null
+  repo: LoAlCo/ValCraft
+  source_url: https://github.com/LoAlCo/ValCraft
+  loader: null
+  loader_hint: Minecraft Fabric mod + Valheim BepInEx plugin communicating through
+    shared memory
+  category: core
+  status:
+  - released
+  - source-available
+  - experimental
+  evidence: repo
+  verified_on_hardware: false
+  source_commit: null
+  sha_fetch_note: non-MIT / no license -> 未拉 SHA

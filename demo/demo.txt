@@ -1,0 +1,46 @@
+==============================================================================
+ PTmodmaker unified passthrough stubs - demo trace  (no game, no engine)
+==============================================================================
+ transport       : shared memory mapping (MAP_SHARED over a file)
+ mapping bytes   : 33685504   units_per_block=70.0
+ cross-check     : 28 struct sizes vs another generator's binding -> AGREE
+
+[a] heartbeat timeout   host killed @ 1.8s
+    guest froze=True  stayed frozen to exit=True  exit=0  stderr=''
+    alive/frozen  t=0 .. 5.0s   [2mgreen = host alive, red = frozen[0m
+    [32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[31m.[0m[31m.[0m[31m.[0m[31m.[0m[31m.[0m[31m.[0m[31m.[0m[31m.[0m[31m.[0m[31m.[0m[31m.[0m[31m.[0m[31m.[0m[31m.[0m[31m.[0m[31m.[0m[31m.[0m[31m.[0m
+    => PASS
+
+[b] epoch invalidation  1 -> 2  (host restart)
+    session discards=1  invalid ticks=11  teleports=1 (late=[])  max tick dx=0.05
+    epoch-sensitive  t=0 .. 6.0s   [2mgreen = epoch valid, red = stale epoch discarded[0m
+    [32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[31m.[0m[31m.[0m[31m.[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m[32m#[0m
+    => PASS
+
+[c] steep wall          wall at x=8.0 h=6.0  slope=90.0deg (walkable limit 50.0deg)
+    guest max x=7.7  max y=1.283  crossed=False  climbed=False  blocked ticks=292
+  side view   [32mo[0m/@=guest  [31m#[0m=wall(x=8.0)  [34m~[0m=floor
+  |                                                                |
+  |                                                                |
+  |                                                                |
+  |                                                                |
+  |                                             [31m#[0m                  |
+  |                                             [31m#[0m                  |
+  |                                             [31m#[0m                  |
+  |                                             [31m#[0m                  |
+  |                                             [31m#[0m                  |
+  |                                             [31m#[0m                  |
+  |                                             [31m#[0m                  |
+  |                                             [31m#[0m                  |
+  |                                             [31m#[0m                  |
+  |                                             [31m#[0m                  |
+  |                             [32mo[0m[32mo[0m     [32mo[0m[32mo[0m[32mo[0m[32mo[0m[32mo[0m[32mo[0m   [31m#[0m                  |
+  |                              [32mo[0m[32mo[0m[32mo[0m  [32mo[0m[32mo[0m     [32mo[0m[32mo[0m [31m#[0m                  |
+  |[34m~[0m[34m~[0m[34m~[0m[34m~[0m[34m~[0m[34m~[0m[34m~[0m[34m~[0m[34m~[0m[34m~[0m[34m~[0m[34m~[0m[34m~[0m[34m~[0m[34m~[0m[34m~[0m[34m~[0m[34m~[0m[34m~[0m[34m~[0m[34m~[0m[34m~[0m[34m~[0m[34m~[0m[34m~[0m[34m~[0m[34m~[0m[34m~[0m[34m~[0m[34m~[0m[34m~[0m[34m~[0m[32mo[0m[32mo[0m[32mo[0m[32mo[0m[34m~[0m[34m~[0m[34m~[0m[34m~[0m[34m~[0m[34m~[0m[34m~[0m[33m@[0m[34m~[0m[31m#[0m[34m~[0m[34m~[0m[34m~[0m[34m~[0m[34m~[0m[34m~[0m[34m~[0m[34m~[0m[34m~[0m[34m~[0m[34m~[0m[34m~[0m[34m~[0m[34m~[0m[34m~[0m[34m~[0m[34m~[0m[34m~[0m|
+  |                                                                |
+  |                                                                |
+  |                                                                |
+    => PASS
+
+verdict: a=PASS  b=PASS  c=PASS   OVERALL=PASS
+==============================================================================

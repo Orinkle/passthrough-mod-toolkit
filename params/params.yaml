@@ -1,0 +1,606 @@
+# =============================================================================
+# PTmodmaker 参数库 (V0 种子)
+# -----------------------------------------------------------------------------
+# 数据来源：awesome-game-mashups (bailo167) —— 许可 CC0-1.0，可自由引用/改写/商用
+# 解剖文档：passthrough-lab/02-架构解剖/{SkyCraft,minecraft-gta5-passthrough,ValCraft}.md
+#           上述解剖文档由本项目产出，同样按 CC0 口径处理。
+# 拉取日期：2026-10-07
+# 重要：本库全部参数均未经过实机验证（verified_on_hardware 一律 false）。
+#       只存观测值与出处，不存任何代码片段；无出处参数一律不进库。
+#
+# 复用等级（reuse_level）：
+#   green  🟢 同引擎同加载器可直搬（loader 名 / depth_convention / focus_model / 协议布局）
+#   yellow 🟡 只能当初始值，必须复核（units_per_block / 伤害系数 / 堆上限）
+#   red    🔴 必须实测（yaw/pitch 表达式 / 合成挂点 / 碰撞策略 / 宿主几何）
+#
+# evidence 三档：repo（读源码） / doc（项目自述文档） / inference（推断/二手转述）
+# =============================================================================
+
+meta:
+  library: PTmodmaker params (v0-seed)
+  license: CC0-1.0
+  pulled_on: 2026-10-07
+  verified_on_hardware: false
+  seed_count: 9
+  param_count: 35
+  color_distribution: {green: 14, yellow: 10, red: 11}
+  evidence_distribution: {repo: 8, doc: 20, inference: 7}
+  do_not_package_count: 7
+  caveats:
+    - "SkyCraft 的 yaw/pitch 在 DESIGN 中并未写死，作者注明 'Phase 0 with a test' 实测标定 —— 故本库不设数值，只记 'must-measure'。"
+    - "任务简报中 'SkyCraft: yaw = 180 - heading' 为误植；该式属于 GTA 版（minecraft-gta5-passthrough），已按解剖文档修正。"
+    - "ValCraft / New VegasCraft 无 LICENSE；据硬约束，ValCraft 参数一律 evidence=inference 且 do_not_package=true，不可默认打包。"
+
+# -----------------------------------------------------------------------------
+# 种子骨架：从 awesome-game-mashups 筛出 approach 含 passthrough / shared memory 的 9 条
+# （由 seed_from_awesome.py 生成；MIT 条目已用 gh 取到 HEAD SHA）
+# -----------------------------------------------------------------------------
+seeds:
+- id: falloutcraft
+  name: FalloutCraft
+  host: Fallout 4
+  guest: ['Minecraft: Java Edition 26.3 (Fabric)', 'Minecraft: Java Edition 1.21.1 (NeoForge)']
+  license: MIT
+  repo: zeyvu/FalloutCraft
+  source_url: https://github.com/zeyvu/FalloutCraft
+  loader: null
+  loader_hint: F4SE plugin + Minecraft Fabric mod using shared memory
+  category: core
+  status: [released, source-available, experimental]
+  evidence: repo
+  verified_on_hardware: false
+  source_commit: cbe85e89f781cfb1db819d13fe8af7656ec12204
+  sha_fetch_note: null
+- id: killcraft
+  name: Killcraft
+  host: ULTRAKILL
+  guest: ['Minecraft: Java Edition']
+  license: MIT
+  repo: goonsn/Killcraft
+  source_url: https://github.com/goonsn/Killcraft
+  loader: null
+  loader_hint: ULTRAKILL BepInEx plugin + SkyCraft Minecraft guest over shared memory
+  category: core
+  status: [released, source-available, experimental]
+  evidence: repo
+  verified_on_hardware: false
+  source_commit: 5137641408aaf677bb3af30a9306d5292572a02f
+  sha_fetch_note: null
+- id: libertycraft
+  name: LibertyCraft
+  host: Grand Theft Auto IV
+  guest: ['Minecraft: Java Edition 26.3']
+  license: MIT
+  repo: mrborghini/libertycraft
+  source_url: https://github.com/mrborghini/libertycraft
+  loader: null
+  loader_hint: GTA IV ASI plugin + SkyCraft-derived Fabric mod over shared memory
+  category: core
+  status: [source-available, verified-wip, experimental]
+  evidence: repo
+  verified_on_hardware: false
+  source_commit: 0fe0f2c9aae2ba974cb077e282b091a38f1ca48f
+  sha_fetch_note: null
+- id: minecraft-crossover-bridge
+  name: Minecraft Crossover Bridge
+  host: 'Monster Hunter: World / Elden Ring via CrossOver on Apple Silicon macOS'
+  guest: ['Minecraft: Java Edition 1.21.1']
+  license: MIT
+  repo: justbustin/minecraft-crossover-bridge
+  source_url: https://github.com/justbustin/minecraft-crossover-bridge
+  loader: null
+  loader_hint: Fabric + native Windows bridge DLLs + shared memory + frame/depth compositing
+  category: core
+  status: [source-available, verified-wip]
+  evidence: repo
+  verified_on_hardware: false
+  source_commit: d1723873ec8f370389cf19f74fac455b9e581321
+  sha_fetch_note: null
+- id: new-vegascraft
+  name: New VegasCraft
+  host: 'Fallout: New Vegas'
+  guest: ['Minecraft: Java Edition 26.3']
+  license: null
+  repo: Davozh/new-vegascraft
+  source_url: https://github.com/Davozh/new-vegascraft
+  loader: null
+  loader_hint: xNVSE + ReShade + Fabric passthrough
+  category: core
+  status: [source-available, verified-wip, experimental]
+  evidence: repo
+  verified_on_hardware: false
+  source_commit: null
+  sha_fetch_note: non-MIT / no license -> 未拉 SHA
+- id: owcraft
+  name: OWCraft
+  host: Outer Wilds
+  guest: ['Minecraft: Java Edition 26.3']
+  license: MIT
+  repo: Yaekai/OWCraft
+  source_url: https://github.com/Yaekai/OWCraft
+  loader: null
+  loader_hint: Outer Wilds Mod Loader host + SkyCraft-derived Fabric guest over shared memory
+  category: core
+  status: [released, source-available, experimental]
+  evidence: repo
+  verified_on_hardware: false
+  source_commit: cd5f0613e1de04c537e7db28a5813b0329cfbfa9
+  sha_fetch_note: null
+- id: skycraft
+  name: SkyCraft
+  host: 'The Elder Scrolls V: Skyrim Special Edition'
+  guest: ['Minecraft: Java Edition']
+  license: MIT
+  repo: chasmlol/SkyCraft
+  source_url: https://github.com/chasmlol/SkyCraft
+  loader: null
+  loader_hint: Skyrim SKSE plugin + Minecraft Fabric mod communicating via shared memory
+  category: core
+  status: [released, source-available, experimental]
+  evidence: repo
+  verified_on_hardware: false
+  source_commit: bfcaf178524b92c2cdeb88e4ce0f13ef9ded6f32
+  sha_fetch_note: null
+- id: subcraft
+  name: SubCraft
+  host: Subnautica
+  guest: ['Minecraft: Java Edition 1.21.1']
+  license: MIT
+  repo: FumperForrest/SubCraft
+  source_url: https://github.com/FumperForrest/SubCraft
+  loader: null
+  loader_hint: NeoForge Minecraft guest + Subnautica BepInEx host over shared memory
+  category: core
+  status: [source-available, verified-wip, experimental]
+  evidence: repo
+  verified_on_hardware: false
+  source_commit: 26a936d73e723e2e611666ef80b2d9a980cb1292
+  sha_fetch_note: null
+- id: valcraft
+  name: ValCraft
+  host: Valheim
+  guest: ['Minecraft: Java Edition 26.3']
+  license: null
+  repo: LoAlCo/ValCraft
+  source_url: https://github.com/LoAlCo/ValCraft
+  loader: null
+  loader_hint: Minecraft Fabric mod + Valheim BepInEx plugin communicating through shared memory
+  category: core
+  status: [released, source-available, experimental]
+  evidence: repo
+  verified_on_hardware: false
+  source_commit: null
+  sha_fetch_note: non-MIT / no license -> 未拉 SHA
+
+# -----------------------------------------------------------------------------
+# 手工提取的已知参数（每条带解剖文档出处：文件名#章节-行号）
+# -----------------------------------------------------------------------------
+params:
+# ===== SkyCraft (chasmlol/SkyCraft @ bfcaf178524b92c2cdeb88e4ce0f13ef9ded6f32) =====
+- id: skycraft.units_per_block
+  host: 'The Elder Scrolls V: Skyrim Special Edition'
+  guest: 'Minecraft: Java Edition'
+  param: units_per_block
+  value: 70
+  unit: 'skyrim_units per minecraft_block'
+  reuse_level: yellow
+  evidence: doc
+  source_repo: chasmlol/SkyCraft
+  source_commit: bfcaf178524b92c2cdeb88e4ce0f13ef9ded6f32
+  source_doc: SkyCraft.md#§4-L112
+  verified_on_hardware: false
+  notes: '由两端身高公理推出（MC 1.8 格 ≈ Skyrim 128 单位 → 128/1.8≈71）；只能当初始值，换宿主必须重算（见 ValCraft=1.0）。'
+- id: skycraft.coord_mapping
+  host: 'The Elder Scrolls V: Skyrim Special Edition'
+  guest: 'Minecraft: Java Edition'
+  param: coord_mapping
+  value: 'mc.x=sky.x/70; mc.y=sky.z/70; mc.z=-sky.y/70  (Skyrim Z-up→MC Y-up；Skyrim +Y=北, MC -Z=北)'
+  reuse_level: yellow
+  evidence: doc
+  source_repo: chasmlol/SkyCraft
+  source_commit: bfcaf178524b92c2cdeb88e4ce0f13ef9ded6f32
+  source_doc: SkyCraft.md#§4-L113
+  verified_on_hardware: false
+  notes: 'Z-up/Y-up 轴向约定随宿主而异，必须复核。'
+- id: skycraft.yaw_pitch
+  host: 'The Elder Scrolls V: Skyrim Special Edition'
+  guest: 'Minecraft: Java Edition'
+  param: yaw_pitch_expr
+  value: 'UNPINNED — author states pinned in Phase 0 test: mc.yaw=f(sky.rotZ), mc.pitch=f(sky.rotX)'
+  reuse_level: red
+  evidence: doc
+  source_repo: chasmlol/SkyCraft
+  source_commit: bfcaf178524b92c2cdeb88e4ce0f13ef9ded6f32
+  source_doc: SkyCraft.md#§4-L114
+  verified_on_hardware: false
+  notes: 'DESIGN 未写死符号/偏移，作者本人注明是实测标定值。本库不存数值，只记 must-measure。'
+- id: skycraft.shared_mem_map_bytes
+  host: 'The Elder Scrolls V: Skyrim Special Edition'
+  guest: 'Minecraft: Java Edition'
+  param: shared_mem_map_bytes
+  value: 200327168
+  unit: bytes (~191.0 MB)
+  reuse_level: yellow
+  evidence: repo
+  source_repo: chasmlol/SkyCraft
+  source_commit: bfcaf178524b92c2cdeb88e4ce0f13ef9ded6f32
+  source_doc: SkyCraft.md#§2-L33
+  verified_on_hardware: false
+  notes: '按 protocol/skycraft_protocol.h 头文件常量精确计算（已读码）。布局随宿主状态块尺寸变化，接新宿主需重算。'
+- id: skycraft.protocol_version
+  host: 'The Elder Scrolls V: Skyrim Special Edition'
+  guest: 'Minecraft: Java Edition'
+  param: protocol_version
+  value: 11
+  reuse_level: green
+  evidence: repo
+  source_repo: chasmlol/SkyCraft
+  source_commit: bfcaf178524b92c2cdeb88e4ce0f13ef9ded6f32
+  source_doc: SkyCraft.md#§4-L124
+  verified_on_hardware: false
+  notes: '协议头布局常量，换宿主只机械改 namespace/magic/字段，可直搬。'
+- id: skycraft.magic
+  host: 'The Elder Scrolls V: Skyrim Special Edition'
+  guest: 'Minecraft: Java Edition'
+  param: magic
+  value: 0x43594B53
+  note_str: '"SKYC"'
+  reuse_level: green
+  evidence: repo
+  source_repo: chasmlol/SkyCraft
+  source_commit: bfcaf178524b92c2cdeb88e4ce0f13ef9ded6f32
+  source_doc: SkyCraft.md#§4-L124
+  verified_on_hardware: false
+- id: skycraft.mapping_name
+  host: 'The Elder Scrolls V: Skyrim Special Edition'
+  guest: 'Minecraft: Java Edition'
+  param: mapping_name
+  value: 'Local\SkyCraft_v1'
+  reuse_level: green
+  evidence: repo
+  source_repo: chasmlol/SkyCraft
+  source_commit: bfcaf178524b92c2cdeb88e4ce0f13ef9ded6f32
+  source_doc: SkyCraft.md#§2-L31
+  verified_on_hardware: false
+- id: skycraft.ipc_patterns
+  host: 'The Elder Scrolls V: Skyrim Special Edition'
+  guest: 'Minecraft: Java Edition'
+  param: ipc_sync_patterns
+  value: 'seqlock (state blocks) + SPSC ring (input/event) + triple-buffer (overlay) + heartbeat/epoch invalidation'
+  reuse_level: green
+  evidence: repo
+  source_repo: chasmlol/SkyCraft
+  source_commit: bfcaf178524b92c2cdeb88e4ce0f13ef9ded6f32
+  source_doc: SkyCraft.md#§2-L40-L66
+  verified_on_hardware: false
+  notes: '传输层 [A] 档，与宿主完全无关，可 100% 固化成库。'
+- id: skycraft.loader
+  host: 'The Elder Scrolls V: Skyrim Special Edition'
+  guest: 'Minecraft: Java Edition'
+  param: loader
+  value: 'SKSE64 (CommonLibSSE-NG, C++23)'
+  reuse_level: green
+  evidence: repo
+  source_repo: chasmlol/SkyCraft
+  source_commit: bfcaf178524b92c2cdeb88e4ce0f13ef9ded6f32
+  source_doc: SkyCraft.md#§1-L17
+  verified_on_hardware: false
+- id: skycraft.collision_res
+  host: 'The Elder Scrolls V: Skyrim Special Edition'
+  guest: 'Minecraft: Java Edition'
+  param: collision_resolution
+  value: '1/8 block = 8.75 units (16^3 section bucket)'
+  reuse_level: red
+  evidence: doc
+  source_repo: chasmlol/SkyCraft
+  source_commit: bfcaf178524b92c2cdeb88e4ce0f13ef9ded6f32
+  source_doc: SkyCraft.md#§4-L115
+  verified_on_hardware: false
+  notes: '碰撞策略属 [C] 档，必须逐游戏实测。'
+- id: skycraft.slope_threshold_deg
+  host: 'The Elder Scrolls V: Skyrim Special Edition'
+  guest: 'Minecraft: Java Edition'
+  param: slope_threshold_deg
+  value: '~50'
+  reuse_level: red
+  evidence: doc
+  source_repo: chasmlol/SkyCraft
+  source_commit: bfcaf178524b92c2cdeb88e4ce0f13ef9ded6f32
+  source_doc: SkyCraft.md#§4-L116
+  verified_on_hardware: false
+- id: skycraft.vert_extent
+  host: 'The Elder Scrolls V: Skyrim Special Edition'
+  guest: 'Minecraft: Java Edition'
+  param: vertical_extent
+  value: 'min_y=-2032, height=4064'
+  reuse_level: red
+  evidence: doc
+  source_repo: chasmlol/SkyCraft
+  source_commit: bfcaf178524b92c2cdeb88e4ce0f13ef9ded6f32
+  source_doc: SkyCraft.md#§4-L119
+  verified_on_hardware: false
+  notes: 'Skyrim 地形跨度超 MC 默认上限，须自定义 dimension_type；宿主几何，必须实测。'
+- id: skycraft.dmg_mc_to_sky
+  host: 'The Elder Scrolls V: Skyrim Special Edition'
+  guest: 'Minecraft: Java Edition'
+  param: damage_mc_to_skyrim
+  value: 'x (5 + 0.25 * npc_level)'
+  reuse_level: yellow
+  evidence: doc
+  source_repo: chasmlol/SkyCraft
+  source_commit: bfcaf178524b92c2cdeb88e4ce0f13ef9ded6f32
+  source_doc: SkyCraft.md#§4-L121
+  verified_on_hardware: false
+  notes: '伤害系数，只能当初始值，必须复核。'
+- id: skycraft.dmg_sky_to_mc
+  host: 'The Elder Scrolls V: Skyrim Special Edition'
+  guest: 'Minecraft: Java Edition'
+  param: damage_skyrim_to_mc
+  value: '/ 5'
+  reuse_level: yellow
+  evidence: doc
+  source_repo: chasmlol/SkyCraft
+  source_commit: bfcaf178524b92c2cdeb88e4ce0f13ef9ded6f32
+  source_doc: SkyCraft.md#§4-L122
+  verified_on_hardware: false
+- id: skycraft.jvm_heap_gb
+  host: 'The Elder Scrolls V: Skyrim Special Edition'
+  guest: 'Minecraft: Java Edition'
+  param: jvm_heap_gb
+  value: '~3'
+  reuse_level: yellow
+  evidence: doc
+  source_repo: chasmlol/SkyCraft
+  source_commit: bfcaf178524b92c2cdeb88e4ce0f13ef9ded6f32
+  source_doc: SkyCraft.md#§4-L123
+  verified_on_hardware: false
+
+# ===== GTA 版 (rehan-remade/universal-modder @ baff1e5d01f63ae7cc81a049b6f4cf60e6c91dec) =====
+- id: gta.units_per_block
+  host: 'Grand Theft Auto V'
+  guest: 'Minecraft: Java Edition'
+  param: units_per_block
+  value: 1
+  unit: 'gta_meter per minecraft_block'
+  reuse_level: yellow
+  evidence: doc
+  source_repo: rehan-remade/universal-modder
+  source_commit: baff1e5d01f63ae7cc81a049b6f4cf60e6c91dec
+  source_doc: minecraft-gta5-passthrough.md#§4-L78
+  verified_on_hardware: false
+  notes: '注意 SkyCraft 是 70，这里是 1 —— 单位比是"每宿主一个数"，只能当初始值。'
+- id: gta.coord_mapping
+  host: 'Grand Theft Auto V'
+  guest: 'Minecraft: Java Edition'
+  param: coord_mapping
+  value: 'MC(x, z+yOffset, -y) <- GTA(x,y,z)'
+  reuse_level: yellow
+  evidence: doc
+  source_repo: rehan-remade/universal-modder
+  source_commit: baff1e5d01f63ae7cc81a049b6f4cf60e6c91dec
+  source_doc: minecraft-gta5-passthrough.md#§4-L79
+  verified_on_hardware: false
+- id: gta.yaw
+  host: 'Grand Theft Auto V'
+  guest: 'Minecraft: Java Edition'
+  param: yaw_expr
+  value: 'mc.yaw = 180 - heading'
+  reuse_level: red
+  evidence: doc
+  source_repo: rehan-remade/universal-modder
+  source_commit: baff1e5d01f63ae7cc81a049b6f4cf60e6c91dec
+  source_doc: minecraft-gta5-passthrough.md#§4-L80
+  verified_on_hardware: false
+  notes: 'yaw 表达式属 [C] 档，必须实测；仓库原文为 180，与 SkyCraft、与二手页传抄的 280 均不同。'
+- id: gta.pitch
+  host: 'Grand Theft Auto V'
+  guest: 'Minecraft: Java Edition'
+  param: pitch_expr
+  value: 'mc.pitch = -pitch'
+  reuse_level: red
+  evidence: doc
+  source_repo: rehan-remade/universal-modder
+  source_commit: baff1e5d01f63ae7cc81a049b6f4cf60e6c91dec
+  source_doc: minecraft-gta5-passthrough.md#§4-L81
+  verified_on_hardware: false
+- id: gta.depth_convention
+  host: 'Grand Theft Auto V'
+  guest: 'Minecraft: Java Edition'
+  param: depth_convention
+  value: reversed-Z
+  reuse_level: green
+  evidence: doc
+  source_repo: rehan-remade/universal-modder
+  source_commit: baff1e5d01f63ae7cc81a049b6f4cf60e6c91dec
+  source_doc: minecraft-gta5-passthrough.md#§4-L83
+  verified_on_hardware: false
+  notes: '.fx 里按 reversed-Z 写 depth test，不能用常规比较；属可直搬约定。'
+- id: gta.ws_endpoint
+  host: 'Grand Theft Auto V'
+  guest: 'Minecraft: Java Edition'
+  param: control_channel
+  value: 'websocket://127.0.0.1:25599 (MC=server, GTA=client ws.cpp)'
+  reuse_level: green
+  evidence: doc
+  source_repo: rehan-remade/universal-modder
+  source_commit: baff1e5d01f63ae7cc81a049b6f4cf60e6c91dec
+  source_doc: minecraft-gta5-passthrough.md#§2-L36
+  verified_on_hardware: false
+  notes: '控制通道用 WebSocket（有序/可靠/消息式），画面通道才用共享内存；约定可直搬。'
+- id: gta.pose_lag_frames
+  host: 'Grand Theft Auto V'
+  guest: 'Minecraft: Java Edition'
+  param: pose_lag_frames
+  value: 1
+  reuse_level: red
+  evidence: doc
+  source_repo: rehan-remade/universal-modder
+  source_commit: baff1e5d01f63ae7cc81a049b6f4cf60e6c91dec
+  source_doc: minecraft-gta5-passthrough.md#§4-L85
+  verified_on_hardware: false
+  notes: '姿态滞后 1 帧（gotcha #8）；时序参数必须实测。'
+- id: gta.clock_source
+  host: 'Grand Theft Auto V'
+  guest: 'Minecraft: Java Edition'
+  param: clock_source
+  value: 'MC System.nanoTime() (NOT GetTickCount, 16ms step)'
+  reuse_level: green
+  evidence: doc
+  source_repo: rehan-remade/universal-modder
+  source_commit: baff1e5d01f63ae7cc81a049b6f4cf60e6c91dec
+  source_doc: minecraft-gta5-passthrough.md#§4-L86
+  verified_on_hardware: false
+- id: gta.prop_cap
+  host: 'Grand Theft Auto V'
+  guest: 'Minecraft: Java Edition'
+  param: block_to_prop_cap
+  value: 400
+  unit: 'invisible collision props (GTA ~1500 crashes)'
+  reuse_level: yellow
+  evidence: doc
+  source_repo: rehan-remade/universal-modder
+  source_commit: baff1e5d01f63ae7cc81a049b6f4cf60e6c91dec
+  source_doc: minecraft-gta5-passthrough.md#§4-L87
+  verified_on_hardware: false
+- id: gta.compositing_route
+  host: 'Grand Theft Auto V'
+  guest: 'Minecraft: Java Edition'
+  param: compositing_route
+  value: 'image (color+depth shared mem + ReShade .fx depth test)'
+  reuse_level: green
+  evidence: doc
+  source_repo: rehan-remade/universal-modder
+  source_commit: baff1e5d01f63ae7cc81a049b6f4cf60e6c91dec
+  source_doc: minecraft-gta5-passthrough.md#§6.3-L176
+  verified_on_hardware: false
+  notes: '路线甲（图像合成）vs 路线乙（几何合成，SkyCraft）；PTmodmaker 须把合成路线做成声明式能力。'
+- id: gta.loader
+  host: 'Grand Theft Auto V'
+  guest: 'Minecraft: Java Edition'
+  param: loader
+  value: 'ScriptHookV 3889.0 (ASI) + ReShade 6.8.0 add-on (ASI) ; -nobattleye'
+  reuse_level: green
+  evidence: repo
+  source_repo: rehan-remade/universal-modder
+  source_commit: baff1e5d01f63ae7cc81a049b6f4cf60e6c91dec
+  source_doc: minecraft-gta5-passthrough.md#§1-L20
+  verified_on_hardware: false
+- id: gta.gl_none_readbuffer_bug
+  host: 'Grand Theft Auto V'
+  guest: 'Minecraft: Java Edition'
+  param: gl_readbuffer_gotcha
+  value: 'MC 26.3 GL 后端 depth copyTextureToBuffer 后把 read buffer 留在 GL_NONE 且不还原'
+  reuse_level: red
+  evidence: doc
+  source_repo: rehan-remade/universal-modder
+  source_commit: baff1e5d01f63ae7cc81a049b6f4cf60e6c91dec
+  source_doc: minecraft-gta5-passthrough.md#§5-A-L99
+  verified_on_hardware: false
+  notes: 'GOTCHA #1：须 Mixin GL command encoder 在 copy 后恢复 read buffer。非数值参数，列为已知坑。'
+
+# ===== GTA yaw 二手误传（必须在 inference 档，禁止采用） =====
+- id: gta.yaw_seo_misquote
+  host: 'Grand Theft Auto V'
+  guest: 'Minecraft: Java Edition'
+  param: yaw_expr__SEO_MISQUOTE_DO_NOT_USE
+  value: '280 - heading  (二手 SEO 站传抄，已被证伪)'
+  reuse_level: red
+  evidence: inference
+  source_repo: null
+  source_commit: null
+  source_doc: 'second-hand SEO pages; rebutted in minecraft-gta5-passthrough.md#§4-L80 / §7-L199'
+  verified_on_hardware: false
+  notes: '网上 SEO 站把仓库原文 180-heading 传抄成 280-heading。属二手转述，必须打 inference 且禁止采用；真值为 180-heading。'
+
+# ===== ValCraft (LoAlCo/ValCraft @ cf1b4cfc34fb5231762296a99be936b1b065505) — 无 LICENSE =====
+# 硬约束：ValCraft 参数一律 evidence=inference 且 do_not_package=true，不可默认打包。
+- id: valcraft.units_per_block
+  host: Valheim
+  guest: 'Minecraft: Java Edition'
+  param: units_per_block
+  value: 1.0
+  unit: 'valheim_unit per minecraft_block'
+  reuse_level: yellow
+  evidence: inference
+  source_repo: LoAlCo/ValCraft
+  source_commit: cf1b4cfc34fb5231762296a99be936b1b065505
+  source_doc: ValCraft.md#§4.2-L50
+  verified_on_hardware: false
+  do_not_package: true
+  notes: '无 LICENSE 仓库；按硬约束 evidence=inference，禁止默认打包。kUnitsPerBlock=1.0（对比 SkyCraft 70）。'
+- id: valcraft.mapping_name
+  host: Valheim
+  guest: 'Minecraft: Java Edition'
+  param: mapping_name
+  value: 'Local\ValCraft_v1'
+  reuse_level: green
+  evidence: inference
+  source_repo: LoAlCo/ValCraft
+  source_commit: cf1b4cfc34fb5231762296a99be936b1b065505
+  source_doc: ValCraft.md#§1-L20
+  verified_on_hardware: false
+  do_not_package: true
+- id: valcraft.magic
+  host: Valheim
+  guest: 'Minecraft: Java Edition'
+  param: magic
+  value: 0x434C4156
+  note_str: '"VALC"'
+  reuse_level: green
+  evidence: inference
+  source_repo: LoAlCo/ValCraft
+  source_commit: cf1b4cfc34fb5231762296a99be936b1b065505
+  source_doc: ValCraft.md#§1-L20
+  verified_on_hardware: false
+  do_not_package: true
+- id: valcraft.protocol_version
+  host: Valheim
+  guest: 'Minecraft: Java Edition'
+  param: protocol_version
+  value: 10
+  reuse_level: green
+  evidence: inference
+  source_repo: LoAlCo/ValCraft
+  source_commit: cf1b4cfc34fb5231762296a99be936b1b065505
+  source_doc: ValCraft.md#§1-L20
+  verified_on_hardware: false
+  do_not_package: true
+  notes: '比 SkyCraft 的 11 低一位，说明从更早版本分叉。'
+- id: valcraft.license
+  host: Valheim
+  guest: 'Minecraft: Java Edition'
+  param: license
+  value: 'NONE (仓库根目录无 LICENSE，默认保留所有权利)'
+  reuse_level: red
+  evidence: repo
+  source_repo: LoAlCo/ValCraft
+  source_commit: cf1b4cfc34fb5231762296a99be936b1b065505
+  source_doc: ValCraft.md#§7-L118
+  verified_on_hardware: false
+  do_not_package: true
+  notes: '合规红线：fork 了 MIT 的 SkyCraft 客侧却未带许可证 —— 学思路可以，抄代码有风险。'
+- id: valcraft.terrain_digging
+  host: Valheim
+  guest: 'Minecraft: Java Edition'
+  param: terrain_digging_supported
+  value: 'false (协议删 DigMaterial/kRenDug/kTriDiggable 整条链路)'
+  reuse_level: red
+  evidence: inference
+  source_repo: LoAlCo/ValCraft
+  source_commit: cf1b4cfc34fb5231762296a99be936b1b065505
+  source_doc: ValCraft.md#§5-L100
+  verified_on_hardware: false
+  do_not_package: true
+  notes: '由删掉的 Dig 能力反推（推断）；[C] 档典型：宿主能力不同 → 整功能分支被砍。'
+- id: valcraft.loader
+  host: Valheim
+  guest: 'Minecraft: Java Edition'
+  param: loader
+  value: 'BepInEx (C#)'
+  reuse_level: green
+  evidence: inference
+  source_repo: LoAlCo/ValCraft
+  source_commit: cf1b4cfc34fb5231762296a99be936b1b065505
+  source_doc: ValCraft.md#§1-L20
+  verified_on_hardware: false
+  do_not_package: true

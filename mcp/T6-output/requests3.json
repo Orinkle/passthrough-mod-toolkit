@@ -1,0 +1,8 @@
+[
+  {"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"t6","version":"0"}}},
+  {"jsonrpc":"2.0","method":"notifications/initialized"},
+  {"jsonrpc":"2.0","id":30,"method":"tools/call","params":{"name":"pt_schema_validate","arguments":{"schema_path":"/home/zjk/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/03-复现路线/v2-mcp/T6-output/schema.v1.yaml"}}},
+  {"jsonrpc":"2.0","id":31,"method":"tools/call","params":{"name":"pt_schema_validate","arguments":{"schema_path":"/home/zjk/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/03-复现路线/v2-mcp/T6-output/schema.v2.yaml"}}},
+  {"jsonrpc":"2.0","id":32,"method":"tools/call","params":{"name":"pt_schema_validate","arguments":{"schema_path":"/home/zjk/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/03-复现路线/v2-mcp/T6-output/schema.v3.yaml"}}},
+  {"jsonrpc":"2.0","id":33,"method":"tools/call","params":{"name":"pt_schema_validate","arguments":{"schema_path":"/home/zjk/WorkBuddy/2026-10-07-20-05-03/passthrough-lab/03-复现路线/v2-mcp/T6-output/schema.v4.yaml"}}}
+]

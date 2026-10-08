@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ptgen"
+version = "0.1.0"
+description = "Generate passthrough-mod shared-memory protocol bindings (C++/C#/Java/Rust/Python) from a single schema.yaml."
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = ["pyyaml>=6.0"]
+
+[project.scripts]
+ptgen = "ptgen.cli:main"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+ptgen = ["py.typed"]
